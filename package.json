@@ -1,0 +1,25 @@
+{
+  "name": "monitor-integrations",
+  "version": "0.1.0",
+  "module": "src/cli.ts",
+  "type": "module",
+  "private": true,
+  "workspaces": ["web"],
+  "scripts": {
+    "scan": "bun run src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "dev": "bun --bun --filter web dev",
+    "test": "bun run test-fixtures/smoke.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^12.1.0",
+    "picocolors": "^1.1.1",
+    "strip-json-comments": "^5.0.3"
+  }
+}
