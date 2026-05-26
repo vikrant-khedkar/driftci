@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Monitor — integration drift',
-  description: 'Catch breaking changes between integration nodes and your OpenAPI spec.',
+  title: 'driftci — catch integration drift',
+  description: 'Catch breaking changes between Make/n8n integrations and your OpenAPI spec.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

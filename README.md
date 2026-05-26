@@ -1,4 +1,4 @@
-# monitor-integrations
+# driftci
 
 Catch breaking changes between your Make / n8n integration and your live OpenAPI spec — before your customers do.
 
@@ -22,7 +22,7 @@ The same story, on repeat:
 
 In every case the API provider knew the change was coming. The integration didn't. End-users found out by watching their workflows break.
 
-`monitor-integrations` parses what your integration *actually calls* and diffs it against your OpenAPI spec. Run it in CI alongside your spec — every breaking change shows up the moment the spec ships, not the moment a customer files a ticket.
+`driftci` parses what your integration *actually calls* and diffs it against your OpenAPI spec. Run it in CI alongside your spec — every breaking change shows up the moment the spec ships, not the moment a customer files a ticket.
 
 ## What it detects
 

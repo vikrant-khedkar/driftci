@@ -1,4 +1,4 @@
-import { mkdtemp, rm, stat, rename } from 'node:fs/promises';
+import { mkdtemp, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -46,7 +46,7 @@ return {
     }
   }
 
-  const tmp = await mkdtemp(join(tmpdir(), 'monitor-integrations-'));
+  const tmp = await mkdtemp(join(tmpdir(), 'driftci-'));
 
   const args = ['clone', '--depth=1', '--quiet'];
   if (ref) args.push('--branch', ref);

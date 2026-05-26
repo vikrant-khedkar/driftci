@@ -70,7 +70,7 @@ function parseArgs(argv: string[]): Args {
   return out;
 }
 
-const USAGE = `monitor-integrations — node ↔ OpenAPI drift detector
+const USAGE = `driftci — node ↔ OpenAPI drift detector
 
 Usage:
   Make:

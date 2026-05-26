@@ -15,7 +15,7 @@ export default function Page() {
         <div className="flex items-baseline gap-3">
           <div className="h-2 w-2 rounded-full bg-[var(--accent)]" />
           <span className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">
-            Monitor
+            driftci
           </span>
         </div>
         <h1 className="mt-4 text-4xl font-medium tracking-tight">
