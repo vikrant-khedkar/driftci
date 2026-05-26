@@ -1,163 +1,227 @@
-import type { ScanResult, Severity, Visibility } from '@cli/types.ts';
-import { groupDrifts, summarizeGroup, paramNames, type DriftGroup } from '@cli/report/group.ts';
-
-const SEVERITY_STYLE: Record<Severity, string> = {
-  BREAKING: 'bg-red-500/15 text-red-400 border-red-500/40',
-  WARNING: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/40',
-  INFO: 'bg-blue-500/15 text-blue-400 border-blue-500/40',
-};
+import type { ScanResult, Visibility } from '@cli/types.ts';
+import { groupDrifts, summarizeGroup, type DriftGroup } from '@cli/report/group.ts';
 
 export function DriftReport({ result }: { result: ScanResult }) {
   const groups = groupDrifts(result.drifts);
-  const breakingCount = result.drifts.filter((d) => d.severity === 'BREAKING').length;
-  const warningCount = result.drifts.filter((d) => d.severity === 'WARNING').length;
-  const infoCount = result.drifts.filter((d) => d.severity === 'INFO').length;
+  const breaking = result.drifts.filter((d) => d.severity === 'BREAKING').length;
+  const warning = result.drifts.filter((d) => d.severity === 'WARNING').length;
+  const info = result.drifts.filter((d) => d.severity === 'INFO').length;
+  const unit = result.platform === 'make' ? 'modules' : 'operations';
+  const aligned = result.drifts.length === 0;
+
+  const driftedNames = new Set(result.drifts.map((d) => d.nodeCall.operationName));
+  const matched = result.scanned.filter((c) => !driftedNames.has(c.operationName));
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        <span className="text-neutral-400">
-          {result.platform} <span className="text-neutral-200">{result.target}</span>
+    <div>
+      <div className="mb-10">
+        <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">
+          {result.platform} · {result.target}
           {result.version && result.version !== 'local' && <> · v{result.version}</>}
-        </span>
-        <span className="text-neutral-600">·</span>
-        <span className="text-neutral-400">
-          {result.scanned.length} {result.platform === 'make' ? 'modules' : 'operations'}
-        </span>
-        <span className="text-neutral-600">·</span>
-        <span className="text-neutral-400">{result.spec.length} spec operations</span>
-
-        <span className="ml-auto flex gap-2">
-          {breakingCount > 0 && (
-            <span className="rounded border border-red-500/40 bg-red-500/15 px-2 py-0.5 text-xs font-medium text-red-400">
-              {breakingCount} BREAKING
-            </span>
-          )}
-          {warningCount > 0 && (
-            <span className="rounded border border-yellow-500/40 bg-yellow-500/15 px-2 py-0.5 text-xs font-medium text-yellow-400">
-              {warningCount} WARNING
-            </span>
-          )}
-          {infoCount > 0 && (
-            <span className="rounded border border-blue-500/40 bg-blue-500/15 px-2 py-0.5 text-xs font-medium text-blue-400">
-              {infoCount} INFO
-            </span>
-          )}
-          {result.drifts.length === 0 && (
-            <span className="rounded border border-green-500/40 bg-green-500/15 px-2 py-0.5 text-xs font-medium text-green-400">
-              ALIGNED
-            </span>
-          )}
-        </span>
+        </div>
+        <div className="mt-4 flex items-baseline gap-6">
+          <Stat
+            value={breaking}
+            label="breaking"
+            accent={breaking > 0}
+            big
+          />
+          <Stat value={warning} label="warnings" />
+          <Stat value={info} label="info" />
+          <div className="ml-auto text-right">
+            <div className="text-2xl font-medium tabular-nums">{result.scanned.length}</div>
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">
+              {unit} scanned
+            </div>
+          </div>
+        </div>
       </div>
 
       {result.warnings.length > 0 && (
-        <details className="rounded border border-neutral-800 bg-neutral-900/50 p-3 text-xs text-neutral-400">
-          <summary className="cursor-pointer">Parser warnings ({result.warnings.length})</summary>
-          <ul className="mt-2 space-y-1 pl-4">
+        <details className="mb-8 border-l border-[var(--line)] pl-4 text-xs text-[var(--ink-mute)]">
+          <summary className="cursor-pointer select-none uppercase tracking-[0.18em]">
+            Parser warnings · {result.warnings.length}
+          </summary>
+          <ul className="mt-3 space-y-1 font-mono">
             {result.warnings.map((w, i) => (
-              <li key={i} className="font-mono">
-                {w}
-              </li>
+              <li key={i}>{w}</li>
             ))}
           </ul>
         </details>
       )}
 
-      {groups.length === 0 ? (
-        <div className="rounded border border-green-500/30 bg-green-500/10 p-6 text-center">
-          <div className="text-lg font-medium text-green-400">No drift detected</div>
-          <div className="mt-1 text-sm text-neutral-400">
-            All {result.platform} operations align with your OpenAPI spec.
-          </div>
-        </div>
-      ) : (
-        <ul className="space-y-2">
+      {!aligned && (
+        <ul className="mb-10 divide-y divide-[var(--line)] border-t border-b border-[var(--line)]">
           {groups.map((g, i) => (
-            <li
-              key={i}
-              className={`rounded border p-4 ${SEVERITY_STYLE[g.severity]} bg-neutral-900/50`}
-            >
-              <div className="flex flex-wrap items-baseline gap-2">
-                <span className="rounded border border-current/40 bg-current/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
-                  {g.severity}
-                </span>
-                <span className="font-mono text-sm">{g.kind}</span>
-                {g.drifts.length > 1 && (
-                  <span className="text-xs text-neutral-500">×{g.drifts.length}</span>
-                )}
-                <span className="ml-auto flex items-center gap-1.5">
-                  <VisibilityBadges v={g.visibility} />
-                  <span className="font-mono text-xs text-neutral-500">{g.module}</span>
-                </span>
-              </div>
-              <div className="mt-3 grid grid-cols-1 gap-1 font-mono text-xs sm:grid-cols-2">
-                <div>
-                  <span className="text-neutral-500">Module sends:</span>{' '}
-                  <span className="text-neutral-200">
-                    {g.call.method} {g.call.pathTemplate}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-neutral-500">Spec has:</span>{' '}
-                  {g.kind === 'endpoint_removed' || g.kind === 'method_mismatch' ? (
-                    <>
-                      <span className="italic text-neutral-500">no match</span>
-                      {g.spec && (
-                        <span className="ml-1 text-neutral-600">
-                          (closest: {g.spec.method} {g.spec.pathTemplate})
-                        </span>
-                      )}
-                    </>
-                  ) : g.spec ? (
-                    <span className="text-neutral-200">
-                      {g.spec.method} {g.spec.pathTemplate}
-                    </span>
-                  ) : (
-                    <span className="italic text-neutral-500">no match</span>
-                  )}
-                </div>
-              </div>
-              <div className="mt-2 text-sm text-neutral-300">{summarizeGroup(g)}</div>
-            </li>
+            <DriftRow key={i} group={g} />
           ))}
         </ul>
+      )}
+
+      {matched.length > 0 && (
+        <details open={aligned} className="border-t border-[var(--line)]">
+          <summary className="flex cursor-pointer select-none items-baseline justify-between py-4">
+            <span className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">
+              {aligned ? 'Aligned' : 'Also matched'} · {matched.length}
+            </span>
+            <span className="text-xs text-[var(--ink-mute)]">show / hide</span>
+          </summary>
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-t border-[var(--line)] text-left text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">
+                <th className="py-3 pr-4 font-normal">{unit === 'modules' ? 'Module' : 'Operation'}</th>
+                <th className="py-3 pr-4 font-normal">Method</th>
+                <th className="py-3 pr-4 font-normal">Path</th>
+                <th className="py-3 pr-0 text-right font-normal">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matched.map((c, i) => (
+                <tr key={i} className="border-t border-[var(--line)]">
+                  <td className="py-3 pr-4 font-medium">{c.operationName}</td>
+                  <td className="py-3 pr-4 font-mono text-xs text-[var(--ink-soft)]">{c.method}</td>
+                  <td className="py-3 pr-4 font-mono text-xs text-[var(--ink-soft)]">
+                    {c.pathTemplate}
+                  </td>
+                  <td className="py-3 pr-0 text-right">
+                    <span className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">
+                      matched
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
       )}
     </div>
   );
 }
 
+function Stat({
+  value,
+  label,
+  accent = false,
+  big = false,
+}: {
+  value: number;
+  label: string;
+  accent?: boolean;
+  big?: boolean;
+}) {
+  const dim = value === 0;
+  return (
+    <div>
+      <div
+        className={`tabular-nums ${big ? 'text-4xl' : 'text-2xl'} font-medium ${
+          accent ? 'text-[var(--accent)]' : dim ? 'text-[var(--ink-mute)]' : 'text-[var(--ink)]'
+        }`}
+      >
+        {value}
+      </div>
+      <div className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">{label}</div>
+    </div>
+  );
+}
+
+function DriftRow({ group: g }: { group: DriftGroup }) {
+  const isBreaking = g.severity === 'BREAKING';
+  return (
+    <li className="group py-5">
+      <div className="flex items-baseline gap-4">
+        <span
+          className={`h-1.5 w-1.5 shrink-0 translate-y-[5px] rounded-full ${
+            isBreaking ? 'bg-[var(--accent)]' : 'bg-[var(--ink-mute)]'
+          }`}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="font-medium">{g.module}</span>
+            <span className="font-mono text-xs text-[var(--ink-mute)]">{formatKind(g.kind)}</span>
+            {g.drifts.length > 1 && (
+              <span className="text-xs text-[var(--ink-mute)]">×{g.drifts.length}</span>
+            )}
+            <span className="ml-auto flex items-center gap-2">
+              <VisibilityBadges v={g.visibility} />
+            </span>
+          </div>
+
+          <div className="mt-2 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-[auto_1fr]">
+            <Row label="sends">
+              <code className="font-mono text-sm">
+                {g.call.method} {g.call.pathTemplate}
+              </code>
+            </Row>
+            <Row label="spec">
+              {g.kind === 'endpoint_removed' || g.kind === 'method_mismatch' ? (
+                <span className="text-[var(--ink-mute)]">
+                  no match
+                  {g.spec && (
+                    <span className="ml-2 italic">
+                      (closest: {g.spec.method} {g.spec.pathTemplate})
+                    </span>
+                  )}
+                </span>
+              ) : g.spec ? (
+                <code className="font-mono text-sm">
+                  {g.spec.method} {g.spec.pathTemplate}
+                </code>
+              ) : (
+                <span className="text-[var(--ink-mute)]">no match</span>
+              )}
+            </Row>
+          </div>
+
+          <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)]">
+            {summarizeGroup(g)}
+          </p>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <>
+      <span className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">{label}</span>
+      <span className="min-w-0">{children}</span>
+    </>
+  );
+}
+
+function formatKind(kind: string): string {
+  return kind.replace(/_/g, ' ');
+}
+
 function VisibilityBadges({ v }: { v?: Visibility }) {
   if (!v) return null;
-  const badges: { label: string; cls: string; title: string }[] = [];
+  const tags: { label: string; title: string }[] = [];
   if (v.archived)
-    badges.push({
-      label: 'ARCHIVED',
-      cls: 'border-neutral-600 text-neutral-400',
+    tags.push({
+      label: 'archived',
       title: 'Hidden + cannot be added; existing scenarios may still call this.',
     });
   if (v.deprecated && !v.archived)
-    badges.push({
-      label: 'DEPRECATED',
-      cls: 'border-orange-500/40 text-orange-400',
+    tags.push({
+      label: 'deprecated',
       title: 'Marked deprecated. Existing customers may still use it.',
     });
   if (!v.public && !v.archived)
-    badges.push({
-      label: 'HIDDEN',
-      cls: 'border-purple-500/40 text-purple-400',
-      title: 'Not shown to new users in the Make UI. Existing scenarios still work.',
+    tags.push({
+      label: 'hidden',
+      title: 'Not shown to new users. Existing scenarios still work.',
     });
-  if (badges.length === 0) return null;
+  if (tags.length === 0) return null;
   return (
     <>
-      {badges.map((b) => (
+      {tags.map((t) => (
         <span
-          key={b.label}
-          title={b.title}
-          className={`rounded border bg-neutral-900 px-1.5 py-0.5 text-[10px] font-bold tracking-wide ${b.cls}`}
+          key={t.label}
+          title={t.title}
+          className="border border-[var(--line)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[var(--ink-mute)]"
         >
-          {b.label}
+          {t.label}
         </span>
       ))}
     </>

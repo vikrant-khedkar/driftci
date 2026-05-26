@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition, useState } from 'react';
 import { runScan, type ScanInput, type ScanResponse } from '../actions';
 
 interface Props {
@@ -8,19 +8,17 @@ interface Props {
   onPending: (pending: boolean) => void;
 }
 
-const DEFAULT_OPENAPI = '/Users/vikrant/Desktop/ScrapeGraphAI/sgai-stack/apps/api/openapi.yaml';
-
 export function ScanForm({ onResult, onPending }: Props) {
   const [platform, setPlatform] = useState<'make' | 'n8n'>('make');
-  const [openapi, setOpenapi] = useState(DEFAULT_OPENAPI);
+  const [openapi, setOpenapi] = useState('');
 
-  const [makeApp, setMakeApp] = useState('scrapegraphai');
+  const [makeApp, setMakeApp] = useState('');
   const [makeVersion, setMakeVersion] = useState('1');
   const [makeRegion, setMakeRegion] = useState('eu1');
 
   const [n8nMode, setN8nMode] = useState<'local' | 'repo'>('repo');
   const [n8nPath, setN8nPath] = useState('');
-  const [n8nRepo, setN8nRepo] = useState('ScrapeGraphAI/n8n-nodes-scrapegraphai');
+  const [n8nRepo, setN8nRepo] = useState('');
   const [n8nSubdir, setN8nSubdir] = useState('');
 
   const [isPending, startTransition] = useTransition();
@@ -48,24 +46,24 @@ export function ScanForm({ onResult, onPending }: Props) {
   };
 
   return (
-    <div className="space-y-4 rounded border border-neutral-800 bg-neutral-900/50 p-5">
-      <div className="flex gap-2">
-        <PlatformPill active={platform === 'make'} onClick={() => setPlatform('make')}>
-          Make
-        </PlatformPill>
-        <PlatformPill active={platform === 'n8n'} onClick={() => setPlatform('n8n')}>
-          n8n
-        </PlatformPill>
-        <span
-          className="ml-auto self-center rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-500"
-          title="Zapier coming next"
-        >
-          Zapier (soon)
-        </span>
+    <div className="space-y-7">
+      <div>
+        <Label>Platform</Label>
+        <div className="mt-2 flex border-b border-[var(--line)]">
+          <Tab active={platform === 'make'} onClick={() => setPlatform('make')}>
+            Make
+          </Tab>
+          <Tab active={platform === 'n8n'} onClick={() => setPlatform('n8n')}>
+            n8n
+          </Tab>
+          <span className="ml-auto self-end pb-3 text-xs text-[var(--ink-mute)]">
+            Zapier — soon
+          </span>
+        </div>
       </div>
 
-      <Field label="OpenAPI spec (URL or absolute path)">
-        <Input value={openapi} onChange={setOpenapi} placeholder="/path/to/openapi.yaml" />
+      <Field label="OpenAPI spec">
+        <Input value={openapi} onChange={setOpenapi} placeholder="URL or absolute path" />
       </Field>
 
       {platform === 'make' ? (
@@ -73,7 +71,7 @@ export function ScanForm({ onResult, onPending }: Props) {
           <Field label="App slug">
             <Input value={makeApp} onChange={setMakeApp} placeholder="scrapegraphai" />
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-[1fr_auto] gap-5">
             <Field label="Version">
               <Input value={makeVersion} onChange={setMakeVersion} placeholder="1" />
             </Field>
@@ -81,7 +79,7 @@ export function ScanForm({ onResult, onPending }: Props) {
               <select
                 value={makeRegion}
                 onChange={(e) => setMakeRegion(e.target.value)}
-                className="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-blue-500"
+                className="h-[34px] border-b border-[var(--line)] bg-transparent pr-6 text-sm focus:border-[var(--ink)] focus:outline-none"
               >
                 <option value="eu1">eu1</option>
                 <option value="eu2">eu2</option>
@@ -90,36 +88,42 @@ export function ScanForm({ onResult, onPending }: Props) {
               </select>
             </Field>
           </div>
-          <div className="text-xs text-neutral-500">
-            <code className="rounded bg-neutral-800 px-1.5 py-0.5">MAKE_API_TOKEN</code> read from
-            server <code className="rounded bg-neutral-800 px-1.5 py-0.5">.env</code>
-          </div>
+          <Hint>
+            <code>MAKE_API_TOKEN</code> read from server <code>.env</code>
+          </Hint>
         </>
       ) : (
         <>
-          <div className="flex gap-2">
-            <PlatformPill active={n8nMode === 'repo'} onClick={() => setN8nMode('repo')} small>
-              GitHub repo
-            </PlatformPill>
-            <PlatformPill active={n8nMode === 'local'} onClick={() => setN8nMode('local')} small>
-              Local path
-            </PlatformPill>
+          <div>
+            <Label>Source</Label>
+            <div className="mt-2 flex gap-5 text-sm">
+              <RadioTab active={n8nMode === 'repo'} onClick={() => setN8nMode('repo')}>
+                GitHub
+              </RadioTab>
+              <RadioTab active={n8nMode === 'local'} onClick={() => setN8nMode('local')}>
+                Local
+              </RadioTab>
+            </div>
           </div>
           {n8nMode === 'repo' ? (
             <>
-              <Field label="Repo (owner/repo[#ref])">
+              <Field label="Repository">
                 <Input
                   value={n8nRepo}
                   onChange={setN8nRepo}
-                  placeholder="ScrapeGraphAI/n8n-nodes-scrapegraphai"
+                  placeholder="owner/repo or owner/repo#ref"
                 />
               </Field>
-              <Field label="Subdir (optional, for monorepos)">
-                <Input value={n8nSubdir} onChange={setN8nSubdir} placeholder="packages/n8n-node" />
+              <Field label="Subdirectory">
+                <Input
+                  value={n8nSubdir}
+                  onChange={setN8nSubdir}
+                  placeholder="optional, for monorepos"
+                />
               </Field>
             </>
           ) : (
-            <Field label="Local path to n8n node package">
+            <Field label="Path">
               <Input value={n8nPath} onChange={setN8nPath} placeholder="/path/to/node-pkg" />
             </Field>
           )}
@@ -129,19 +133,26 @@ export function ScanForm({ onResult, onPending }: Props) {
       <button
         onClick={submit}
         disabled={isPending}
-        className="w-full rounded bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:bg-neutral-800 disabled:text-neutral-500"
+        className="group flex w-full items-center justify-between bg-[var(--ink)] px-5 py-3.5 text-sm font-medium text-[var(--bg)] transition hover:bg-[var(--accent)] disabled:opacity-40"
       >
-        {isPending ? 'Scanning…' : 'Run scan'}
+        <span>{isPending ? 'Scanning' : 'Run scan'}</span>
+        <span className="transition group-hover:translate-x-1">→</span>
       </button>
     </div>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-xs uppercase tracking-[0.18em] text-[var(--ink-mute)]">{children}</span>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs uppercase tracking-wide text-neutral-500">{label}</span>
-      {children}
+      <Label>{label}</Label>
+      <div className="mt-2">{children}</div>
     </label>
   );
 }
@@ -161,32 +172,63 @@ function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 font-mono text-sm text-neutral-100 outline-none focus:border-blue-500"
+      spellCheck={false}
+      className="w-full border-b border-[var(--line)] bg-transparent pb-2 font-mono text-sm text-[var(--ink)] placeholder:text-[var(--ink-mute)] focus:border-[var(--ink)] focus:outline-none"
     />
   );
 }
 
-function PlatformPill({
+function Tab({
   active,
   onClick,
   children,
-  small = false,
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
-  small?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`rounded border px-3 ${small ? 'py-1 text-xs' : 'py-1.5 text-sm'} font-medium ${
+      className={`-mb-px border-b-2 pb-3 pr-6 text-sm transition ${
         active
-          ? 'border-blue-500 bg-blue-500/15 text-blue-300'
-          : 'border-neutral-700 bg-neutral-900 text-neutral-400 hover:border-neutral-600'
+          ? 'border-[var(--ink)] text-[var(--ink)]'
+          : 'border-transparent text-[var(--ink-mute)] hover:text-[var(--ink-soft)]'
       }`}
     >
       {children}
     </button>
+  );
+}
+
+function RadioTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 transition ${
+        active ? 'text-[var(--ink)]' : 'text-[var(--ink-mute)] hover:text-[var(--ink-soft)]'
+      }`}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${active ? 'bg-[var(--ink)]' : 'bg-[var(--line)]'}`}
+      />
+      {children}
+    </button>
+  );
+}
+
+function Hint({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs text-[var(--ink-mute)] [&_code]:rounded [&_code]:bg-[var(--line-soft)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[11px]">
+      {children}
+    </p>
   );
 }

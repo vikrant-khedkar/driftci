@@ -1,6 +1,7 @@
 import pc from 'picocolors';
 import type { ScanResult, Severity } from '../types.ts';
 import { groupDrifts, summarizeGroup, type DriftGroup } from './group.ts';
+import { detectSpecMismatch } from '../diff/mismatch.ts';
 
 const SEVERITY_BADGE: Record<Severity, (s: string) => string> = {
   BREAKING: (s) => pc.bgRed(pc.white(pc.bold(` ${s} `))),
@@ -29,6 +30,24 @@ export function renderText(result: ScanResult): string {
       pc.green(pc.bold(`No drift detected. All ${result.platform} ${unit} align with spec.`)),
     );
     return lines.join('\n');
+  }
+
+  const mismatch = detectSpecMismatch(result.drifts, result.scanned, result.spec);
+  if (mismatch) {
+    const pct = Math.round(mismatch.removedRatio * 100);
+    lines.push(pc.bgYellow(pc.black(pc.bold(' LIKELY WRONG SPEC '))));
+    lines.push(
+      pc.yellow(
+        `  ${pct}% of drifts are missing endpoints, and ${result.platform} calls live under ` +
+          `${pc.bold(mismatch.nodePrefix + '/*')} while the spec defines ${pc.bold(mismatch.specPrefix + '/*')}.`,
+      ),
+    );
+    lines.push(
+      pc.yellow(
+        `  Did you point --openapi at the wrong file? (Common causes: v1 vs v2 API, staging vs prod spec.)`,
+      ),
+    );
+    lines.push('');
   }
 
   const byKind = countBy(result.drifts, (d) => d.severity);

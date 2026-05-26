@@ -13,28 +13,23 @@ async function withConcurrencyLimit<T, R>(
   items: T[],
   fn: (item: T) => Promise<R>,
 ): Promise<R[]> {
-  const results: (R | undefined)[] = new Array(items.length);
-  let idx = 0;
-  const running: Promise<void>[] = [];
+  const results: R[] = new Array(items.length);
+  let cursor = 0;
 
-  while (idx < items.length || running.length > 0) {
-    while (idx < items.length && running.length < CONCURRENCY_LIMIT) {
-      const currentIdx = idx++;
-      const item = items[currentIdx] as T;
-      const promise = fn(item).then((result) => {
-        results[currentIdx] = result;
-      });
-      running.push(promise.then(() => {
-        const i = running.indexOf(promise);
-        if (i !== -1) running.splice(i, 1);
-      }));
+  const worker = async (): Promise<void> => {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      results[i] = await fn(items[i] as T);
     }
-    if (running.length > 0) {
-      await Promise.race(running);
-    }
-  }
+  };
 
-  return results as R[];
+  const workers = Array.from(
+    { length: Math.min(CONCURRENCY_LIMIT, items.length) },
+    () => worker(),
+  );
+  await Promise.all(workers);
+  return results;
 }
 
 export interface MakeFetchOptions {
