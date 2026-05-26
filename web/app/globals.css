@@ -1,14 +1,26 @@
 @import 'tailwindcss';
 
 :root {
-  --bg: #fafaf9;
-  --ink: #0c0a09;
-  --ink-soft: #44403c;
-  --ink-mute: #a8a29e;
-  --line: #e7e5e4;
-  --line-soft: #f5f5f4;
-  --accent: #e11d48;
+  --bg: #fbfaf7;
+  --bg-2: #f4f2ec;
+  --ink: #0d0d0c;
+  --ink-2: #2a2a27;
+  --ink-soft: #2a2a27;
+  --ink-mute: #76746e;
+  --muted-2: #a3a09a;
+  --line: #e8e5dd;
+  --line-soft: #f4f2ec;
+  --border-strong: #d9d5cb;
+  --accent: #ff5c1f;
+  --accent-tint: #ffece1;
   --accent-soft: #fff1f2;
+  --breaking: #e23a14;
+  --breaking-tint: #fde6df;
+  --warning: #b88200;
+  --warning-tint: #fbf2d8;
+  --info: #5e5e58;
+  --info-tint: #ecebe5;
+  --ok: #1f7a4a;
 }
 
 html,
@@ -16,7 +28,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family:
-    'Inter',
+    'Geist',
     ui-sans-serif,
     system-ui,
     -apple-system,
@@ -24,9 +36,8 @@ body {
     'Segoe UI',
     sans-serif;
   font-feature-settings:
-    'cv11',
     'ss01',
-    'ss03';
+    'cv11';
   -webkit-font-smoothing: antialiased;
 }
 
@@ -37,4 +48,16 @@ body {
 ::selection {
   background: var(--ink);
   color: var(--bg);
+}
+
+@keyframes ping-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  80%,
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
