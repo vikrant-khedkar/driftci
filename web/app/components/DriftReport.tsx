@@ -175,9 +175,58 @@ function DriftRow({ group: g }: { group: DriftGroup }) {
           <p className="mt-3 text-sm leading-relaxed text-[var(--ink-soft)]">
             {summarizeGroup(g)}
           </p>
+
+          <SuggestionBlock group={g} />
         </div>
       </div>
     </li>
+  );
+}
+
+const CONFIDENCE_STYLE: Record<string, string> = {
+  high: 'border-[var(--ok)] text-[var(--ok)]',
+  medium: 'border-[var(--warning)] text-[var(--warning)]',
+  low: 'border-[var(--line)] text-[var(--ink-mute)]',
+};
+
+function SuggestionBlock({ group }: { group: DriftGroup }) {
+  const s = group.drifts[0]?.suggestion;
+  if (!s) return null;
+  return (
+    <div className="mt-3 rounded-lg border border-[var(--line)] bg-[var(--bg-2)] p-3">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-mute)]">
+          Suggested fix
+        </span>
+        <span
+          className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase ${CONFIDENCE_STYLE[s.confidence]}`}
+        >
+          {s.confidence} confidence
+        </span>
+        {s.autofixable && (
+          <span className="rounded border border-[var(--accent)] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[var(--accent)]">
+            auto-fixable
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-sm text-[var(--ink)]">{s.summary}</p>
+      {s.detail && <p className="mt-1 text-xs text-[var(--ink-mute)]">{s.detail}</p>}
+      {(s.before || s.after) && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-xs">
+          {s.before && (
+            <code className="rounded bg-[var(--breaking-tint)] px-2 py-1 text-[var(--breaking)] line-through">
+              {s.before}
+            </code>
+          )}
+          {s.before && s.after && <span className="text-[var(--ink-mute)]">→</span>}
+          {s.after && (
+            <code className="rounded bg-[var(--accent-tint)] px-2 py-1 text-[var(--ink)]">
+              {s.after}
+            </code>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

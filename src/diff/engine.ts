@@ -81,6 +81,7 @@ function diffParams(node: ApiCall, spec: ApiCall): Drift[] {
         kind: 'missing_required_param',
         nodeCall: node,
         specMatch: spec,
+        param: sp,
         message: `Module ${node.operationName}: spec requires ${sp.location} param "${sp.name}" but module does not declare it.${visibilityNote(node)}`,
       });
     }
@@ -94,6 +95,7 @@ function diffParams(node: ApiCall, spec: ApiCall): Drift[] {
         kind: 'unknown_param',
         nodeCall: node,
         specMatch: spec,
+        param: np,
         message: `Module ${node.operationName}: declares ${np.location} param "${np.name}" not present in spec (may be deprecated or renamed).`,
       });
     }

@@ -2,16 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import './landing-components/landing.css';
-import {
-  PROVIDERS,
-  CASES,
-  DETECT_ROWS,
-  INSTALL_TABS,
-  FAQS,
-  GITHUB_URL,
-  type Provider,
-  type InstallTab,
-} from './landing-components/data';
+import { PROVIDERS, CASES, DETECT_ROWS, FAQS, type Provider } from './landing-components/data';
 
 export default function LandingPage() {
   return (
@@ -40,59 +31,15 @@ function NavBar() {
           <div className="links">
             <a className="link" href="#why">Why</a>
             <a className="link" href="#detects">Detection</a>
-            <a className="link" href="#install">Install</a>
             <a className="link" href="#faq">FAQ</a>
-            <a className="link" href="/scan">Demo</a>
-            <a className="pill" href={GITHUB_URL} target="_blank" rel="noopener">
-              <span className="dot" />
-              <span>github.com/driftci</span>
+            <a className="link" href="/login">Log in</a>
+            <a className="pill" href="/signup">
+              <span>Sign up</span>
             </a>
           </div>
         </div>
       </div>
     </nav>
-  );
-}
-
-function CopyStrip({ cmd }: { cmd: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <div className={'install-strip' + (copied ? ' copied' : '')}>
-      <span className="prompt">$</span>
-      <span>{cmd}</span>
-      <button
-        className="copy"
-        onClick={() => {
-          navigator.clipboard?.writeText(cmd).catch(() => {});
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1400);
-        }}
-        aria-label="Copy command"
-      >
-        {copied ? (
-          <>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M2.5 6L5 8.5L10 3"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            copied
-          </>
-        ) : (
-          <>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <rect x="3.5" y="3.5" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.3" />
-              <path d="M2 8V2.5C2 2.22 2.22 2 2.5 2H8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-            </svg>
-            copy
-          </>
-        )}
-      </button>
-    </div>
   );
 }
 
@@ -165,7 +112,7 @@ function Hero() {
         <div className="hero-grid">
           <div>
             <span className="eyebrow">
-              <span className="ping" /> v0.1 — CI-ready, MIT
+              <span className="ping" /> Now monitoring Make &amp; n8n
             </span>
             <h1 className="display">
               Catch API drift <em>before</em> your customers do.
@@ -177,8 +124,8 @@ function Hero() {
               {' '}not the moment a customer files a ticket.
             </p>
             <div className="cta-row">
-              <CopyStrip cmd="bun add -D driftci" />
-              <a className="btn btn-ghost" href="/scan">Try the demo →</a>
+              <a className="btn btn-primary" href="/signup">Start monitoring →</a>
+              <a className="btn btn-ghost" href="/scan">Try the demo</a>
             </div>
 
             <div style={{ display: 'flex', gap: 28, marginTop: 36, color: 'var(--ink-mute)', fontSize: 13 }}>
@@ -338,65 +285,53 @@ function Detects() {
   );
 }
 
-function Install() {
-  const [tab, setTab] = useState(0);
-  const cfg: InstallTab = INSTALL_TABS[tab]!;
+const STEPS = [
+  {
+    n: '01',
+    title: 'Connect your OpenAPI spec',
+    body: 'Point us at your spec — a URL or a file. We read every endpoint, method, and required parameter your API actually exposes.',
+  },
+  {
+    n: '02',
+    title: 'Connect your integrations',
+    body: 'Add your Make app (read-only token, stored encrypted) or your n8n node repo. We parse what each one actually calls — not version numbers, the real requests.',
+  },
+  {
+    n: '03',
+    title: 'See drift the moment it appears',
+    body: 'Every removed endpoint, renamed param, or auth change surfaces in your dashboard — deduped, severity-ranked, and tied to the exact module that breaks.',
+  },
+];
 
+function Install() {
   return (
-    <section className="s" id="install" style={{ background: 'var(--bg)' }}>
+    <section className="s" id="how" style={{ background: 'var(--bg)' }}>
       <div className="wrap">
         <div className="section-head">
           <div>
-            <span className="label accent">§ 03 · install &amp; run</span>
-            <h2>One command. Then CI does it forever.</h2>
+            <span className="label accent">§ 03 · how it works</span>
+            <h2>Connect once. We watch the seam.</h2>
           </div>
           <p className="lede" style={{ maxWidth: '44ch' }}>
-            <b>drift/ci</b> is a single binary with <b>zero runtime deps</b> on your app. Run it locally,
-            run it on every spec commit, run it nightly against prod.
+            Your API evolves on one side, your Make and n8n integrations on the other.
+            <b> drift/ci sits in the middle</b> and tells you the instant they stop agreeing.
           </p>
         </div>
 
-        <div>
-          <div className="tabs" role="tablist">
-            {INSTALL_TABS.map((t, i) => (
-              <button
-                key={t.key}
-                className={'tab' + (i === tab ? ' active' : '')}
-                role="tab"
-                aria-selected={i === tab}
-                onClick={() => setTab(i)}
-              >
-                <span className="num">0{i + 1}</span>
-                {t.label}
-              </button>
-            ))}
-          </div>
-          <div className="terminal">
-            <div className="t-head">
-              <span>{cfg.head}</span>
-              <span>bash · driftci v0.1</span>
+        <div className="how-grid">
+          {STEPS.map((s) => (
+            <div className="how-step" key={s.n}>
+              <span className="how-num">{s.n}</span>
+              <h3>{s.title}</h3>
+              <p>{s.body}</p>
             </div>
-            <div className="t-body">
-              {cfg.body.map((row, i) => {
-                if (row.type === 'blank') return <span className="ln" key={i}>&nbsp;</span>;
-                if (row.type === 'cm') return <span className="ln cm" key={i}>{row.text}</span>;
-                if (row.type === 'dim') return <span className="ln dim" key={i}>{row.text}</span>;
-                if (row.type === 'ok') return <span className="ln ok" key={i}>{row.text}</span>;
-                if (row.type === 'bad') return <span className="ln bad" key={i}>{row.text}</span>;
-                if (row.type === 'warn') return <span className="ln warn" key={i}>{row.text}</span>;
-                if (row.type === 'cmd') {
-                  return (
-                    <span className="ln" key={i}>
-                      {row.parts.map((p, j) => (
-                        <span className={p[0]} key={j}>{p[1]}</span>
-                      ))}
-                    </span>
-                  );
-                }
-                return null;
-              })}
-            </div>
-          </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 40, display: 'flex', justifyContent: 'center' }}>
+          <a className="btn btn-primary" href="/signup">
+            Start monitoring your integrations →
+          </a>
         </div>
       </div>
     </section>
@@ -440,7 +375,7 @@ function Footer() {
               drift<span className="slash">/</span>ci
             </a>
             <div className="meta" style={{ marginTop: 10 }}>
-              MIT — © 2026. Built for engineers who don&apos;t want to hear about it from a customer first.
+              © 2026 drift/ci. Built for engineers who don&apos;t want to hear about it from a customer first.
             </div>
           </div>
           <div style={{ display: 'flex', gap: 64, flexWrap: 'wrap' }}>
@@ -448,14 +383,12 @@ function Footer() {
               <h5>Product</h5>
               <a href="#why">Why</a>
               <a href="#detects">Detection</a>
-              <a href="#install">Install</a>
               <a href="#faq">FAQ</a>
             </div>
             <div className="col">
-              <h5>Source</h5>
-              <a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
-              <a href={`${GITHUB_URL}/releases`} target="_blank" rel="noopener">Changelog</a>
-              <a href={`${GITHUB_URL}/blob/main/LICENSE`} target="_blank" rel="noopener">License</a>
+              <h5>Account</h5>
+              <a href="/login">Log in</a>
+              <a href="/signup">Sign up</a>
             </div>
             <div className="col">
               <h5>Try it</h5>

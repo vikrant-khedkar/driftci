@@ -743,3 +743,43 @@
   font-size: 13px;
   color: var(--ink-mute);
 }
+
+/* How it works */
+.landing .how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 820px) {
+  .landing .how-grid { grid-template-columns: 1fr; }
+}
+.landing .how-step {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 28px 24px;
+  background: var(--bg);
+}
+.landing .how-num {
+  display: inline-block;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid var(--accent-tint);
+  background: var(--accent-tint);
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin-bottom: 16px;
+}
+.landing .how-step h3 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+}
+.landing .how-step p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-mute);
+  margin: 0;
+}

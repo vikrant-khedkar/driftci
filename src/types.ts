@@ -35,12 +35,23 @@ export type DriftKind =
   | 'auth_mismatch'
   | 'unparseable';
 
+export interface Suggestion {
+  summary: string; // one-line "do this"
+  detail?: string; // optional longer rationale
+  before?: string; // current state (L3 before/after)
+  after?: string; // target state
+  confidence: 'high' | 'medium' | 'low';
+  autofixable: boolean; // mechanical enough to draft an auto-fix later
+}
+
 export interface Drift {
   severity: Severity;
   kind: DriftKind;
   nodeCall: ApiCall;
   specMatch?: ApiCall;
   message: string;
+  param?: Param; // populated for param-related drifts
+  suggestion?: Suggestion; // filled by remediation layer
 }
 
 export interface ScanResult {
