@@ -1,26 +1,47 @@
 @import 'tailwindcss';
 
 :root {
-  --bg: #fbfaf7;
-  --bg-2: #f4f2ec;
-  --ink: #0d0d0c;
-  --ink-2: #2a2a27;
-  --ink-soft: #2a2a27;
-  --ink-mute: #76746e;
-  --muted-2: #a3a09a;
-  --line: #e8e5dd;
-  --line-soft: #f4f2ec;
-  --border-strong: #d9d5cb;
-  --accent: #ff5c1f;
-  --accent-tint: #ffece1;
-  --accent-soft: #fff1f2;
-  --breaking: #e23a14;
-  --breaking-tint: #fde6df;
-  --warning: #b88200;
-  --warning-tint: #fbf2d8;
-  --info: #5e5e58;
-  --info-tint: #ecebe5;
-  --ok: #1f7a4a;
+  --bg: #fafaf9;
+  --bg-2: #f5f5f4;
+  --bg-3: #e7e5e4;
+  --ink: #0c0a09;
+  --ink-2: #292524;
+  --ink-soft: #44403c;
+  --ink-mute: #78716c;
+  --muted-2: #a8a29e;
+  --line: #e7e5e4;
+  --line-soft: #f5f5f4;
+  --border-strong: #d6d3d1;
+  --accent: #f97316;
+  --accent-2: #ea580c;
+  --accent-tint: #fff7ed;
+  --accent-soft: #ffedd5;
+  --breaking: #dc2626;
+  --breaking-tint: #fef2f2;
+  --warning: #ca8a04;
+  --warning-tint: #fefce8;
+  --info: #57534e;
+  --info-tint: #f5f5f4;
+  --ok: #16a34a;
+  --ok-tint: #f0fdf4;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -35,10 +56,9 @@ body {
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  font-feature-settings:
-    'ss01',
-    'cv11';
+  font-feature-settings: 'ss01', 'cv11';
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -46,18 +66,36 @@ body {
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent);
+  color: white;
 }
 
 @keyframes ping-ring {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.6;
-  }
-  80%,
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
+  0% { transform: scale(0.6); opacity: 0.6; }
+  80%, 100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }

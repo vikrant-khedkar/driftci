@@ -181,18 +181,18 @@ function Hero() {
               <a className="btn btn-ghost" href="/scan">Try the demo →</a>
             </div>
 
-            <div style={{ display: 'flex', gap: 28, marginTop: 36, color: 'var(--ink-mute)', fontSize: 13 }}>
-              <div>
-                <span className="label ink">5 providers</span>
-                <div style={{ marginTop: 4 }}>scanned in &lt; 3s</div>
+            <div className="stats-row">
+              <div className="stat">
+                <span className="label ink">5+ providers</span>
+                <span className="val">scanned in &lt; 3s</span>
               </div>
-              <div>
+              <div className="stat">
                 <span className="label ink">0 deps</span>
-                <div style={{ marginTop: 4 }}>on your runtime</div>
+                <span className="val">on your runtime</span>
               </div>
-              <div>
+              <div className="stat">
                 <span className="label ink">CI-native</span>
-                <div style={{ marginTop: 4 }}>exit codes, JSON out</div>
+                <span className="val">exit codes, JSON out</span>
               </div>
             </div>
           </div>
